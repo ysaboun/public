@@ -55,3 +55,44 @@ Analyser la performance d'une application monolithique Java Web peut se faire à
 2. **Java Mission Control (JMC)** : Outil de monitoring et de gestion des performances pour les applications Java basé sur les données JDK Flight Recorder (JFR).
 
 Ces outils, lorsqu'ils sont utilisés de manière complémentaire, peuvent fournir une vue complète de la performance d'une application Java Web monolithique, en identifiant les problèmes de code, les goulets d'étranglement de performance, et en surveillant les métriques en temps réel pour assurer une optimisation continue.
+
+
+Pour améliorer la complexité cyclomatique, il est utile d'utiliser des patterns d'architecture et de conception qui favorisent un code plus modulaire, réutilisable et maintenable. Voici quelques-uns des patterns les plus efficaces :
+
+### 1. **Single Responsibility Principle (SRP)**
+Chaque classe ou module doit avoir une seule responsabilité ou raison de changer. En adhérant à ce principe, le code devient plus simple et la complexité cyclomatique diminue.
+
+### 2. **Strategy Pattern**
+Le pattern Strategy permet de définir une famille d'algorithmes, de les encapsuler dans des classes distinctes et de les rendre interchangeables. Ce pattern réduit la complexité cyclomatique en déléguant des comportements spécifiques à des classes distinctes.
+
+### 3. **State Pattern**
+Le pattern State permet à un objet de changer son comportement lorsqu'il change d'état. Il encapsule les comportements associés à chaque état dans des classes distinctes, ce qui réduit la complexité cyclomatique en distribuant la logique conditionnelle entre plusieurs classes.
+
+### 4. **Command Pattern**
+Le pattern Command transforme une requête en un objet autonome qui contient toutes les informations nécessaires pour exécuter l'action. Ce pattern aide à réduire la complexité cyclomatique en simplifiant la gestion des actions et en déléguant les comportements spécifiques à des objets de commande distincts.
+
+### 5. **Factory Method Pattern**
+Ce pattern permet de créer des objets sans spécifier la classe concrète à utiliser. Il aide à réduire la complexité cyclomatique en séparant la logique de création des objets de la logique métier, simplifiant ainsi les classes.
+
+### 6. **Template Method Pattern**
+Le pattern Template Method définit le squelette d'un algorithme dans une méthode, tout en laissant certaines étapes spécifiques aux sous-classes. Ce pattern aide à réduire la complexité cyclomatique en évitant les duplications de code et en centralisant la structure commune d'un algorithme.
+
+### 7. **Decorator Pattern**
+Le pattern Decorator permet d'ajouter dynamiquement des comportements à un objet sans modifier sa structure. Ce pattern aide à réduire la complexité cyclomatique en permettant d'ajouter des fonctionnalités de manière modulaire et flexible.
+
+### 8. **Observer Pattern**
+Le pattern Observer définit une relation de dépendance entre objets de sorte qu'un changement dans un objet entraîne une notification aux objets dépendants. Ce pattern aide à gérer la complexité en séparant les préoccupations et en évitant des conditions complexes dans les classes.
+
+### 9. **Facade Pattern**
+Le pattern Facade fournit une interface simplifiée à un ensemble de classes ou à une sous-système complexe. Cela réduit la complexité cyclomatique en centralisant les interactions avec les composants complexes, rendant le code client plus simple.
+
+### 10. **Chain of Responsibility Pattern**
+Le pattern Chain of Responsibility permet de transmettre une requête le long d'une chaîne de gestionnaires jusqu'à ce qu'un gestionnaire traite la requête. Ce pattern aide à réduire la complexité cyclomatique en évitant des structures conditionnelles imbriquées et en déléguant la responsabilité de la gestion de la requête à différents objets.
+
+### 11. **Modularisation et découpage en microservices**
+En suivant une architecture de microservices, où chaque service est autonome et gère une seule responsabilité, la complexité du système est répartie entre plusieurs services, réduisant ainsi la complexité cyclomatique de chaque composant individuel.
+
+### 12. **Refactoring**
+Refactoriser le code existant en utilisant les patterns de conception ci-dessus peut considérablement réduire la complexité cyclomatique. Les techniques de refactoring incluent l'extraction de méthodes, la décomposition de classes, et la clarification de la logique conditionnelle.
+
+En utilisant ces patterns de conception et principes d'architecture, il est possible de rendre le code plus modulaire, réutilisable et maintenable, ce qui conduit à une réduction de la complexité cyclomatique et à une amélioration de la qualité globale du code.
