@@ -148,3 +148,104 @@ L'Authorization Code est un concept clé dans le cadre du protocole OAuth 2.0, q
 3. **Isolation des Credentials**: L'utilisateur fournit ses informations de connexion directement au serveur d'autorisation, pas à l'application cliente, réduisant ainsi les risques de compromission des credentials.
 
 En résumé, l'Authorization Code Flow est une méthode sécurisée et efficace pour gérer l'authentification et l'autorisation dans des applications qui nécessitent un accès aux ressources utilisateur.
+
+
+
+
+
+
+
+
+
+
+Le processus de renouvellement des tokens avec OAuth 2.0 (Refresh Token Flow) permet à une application cliente d'obtenir un nouveau jeton d'accès sans nécessiter une nouvelle authentification de l'utilisateur. Voici les étapes détaillées de ce flux :
+
+### Étapes du Refresh Token Flow
+
+1. **Obtention Initiale du Refresh Token**:
+   - Lors de la première authentification et autorisation (souvent via l'Authorization Code Flow), l'application cliente reçoit un Access Token et un Refresh Token du serveur d'autorisation.
+
+2. **Utilisation de l'Access Token**:
+   - L'application cliente utilise l'Access Token pour accéder aux ressources protégées. Ce jeton a une durée de vie limitée (expiration).
+
+3. **Expiration de l'Access Token**:
+   - Lorsque l'Access Token expire, l'application cliente ne peut plus accéder aux ressources protégées avec ce jeton.
+
+4. **Demande de Renouvellement du Token**:
+   - L'application cliente envoie une requête au serveur d'autorisation pour échanger le Refresh Token contre un nouveau Access Token. Cette requête inclut :
+     - `grant_type` : fixé à `refresh_token`
+     - `refresh_token` : le Refresh Token actuel
+     - `client_id` : l'identifiant de l'application cliente
+     - `client_secret` : le secret de l'application cliente (s'il est requis)
+   
+   Exemple de requête HTTP POST :
+
+   ```plaintext
+   POST /token
+   Host: authorization-server.com
+   Content-Type: application/x-www-form-urlencoded
+
+   grant_type=refresh_token&
+   refresh_token=existing_refresh_token&
+   client_id=your_client_id&
+   client_secret=your_client_secret
+   ```
+
+5. **Réponse du Serveur d'Autorisation**:
+   - Le serveur d'autorisation valide le Refresh Token. S'il est valide, il renvoie une réponse contenant un nouveau Access Token, et parfois un nouveau Refresh Token.
+
+   Exemple de réponse JSON :
+
+   ```json
+   {
+     "access_token": "new_access_token",
+     "token_type": "bearer",
+     "expires_in": 3600,
+     "refresh_token": "new_refresh_token"
+   }
+   ```
+
+6. **Utilisation du Nouveau Access Token**:
+   - L'application cliente utilise le nouveau Access Token pour continuer à accéder aux ressources protégées. Si un nouveau Refresh Token a été émis, il remplace l'ancien.
+
+### Schéma du Flux de Renouvellement
+
+```plaintext
++----------+                               +---------------+
+|          |-- (1) Demande initiale ------>|               |
+|  Client  |<-- et obtention des Tokens ---| Authorization  |
+|          |                               |    Server      |
+|          |-- (2) Utilisation du -------->|               |
+|          |   Access Token                |               |
+|          |                               |               |
+|          |<- (3) Expiration de l'--------|
+|          |   Access Token                |
+|          |                               |
+|          |-- (4) Demande de Renouvellement --->
+|          |   avec Refresh Token          |
+|          |                               |
+|          |<-- (5) Nouveau Access Token --|
+|          |    et potentiellement nouveau Refresh Token   |
++----------+
+```
+
+### Avantages du Refresh Token Flow
+
+1. **Sécurité Améliorée**:
+   - Réduit la nécessité pour l'utilisateur de se réauthentifier fréquemment, minimisant l'exposition des credentials.
+   
+2. **Amélioration de l'Expérience Utilisateur**:
+   - Permet une expérience utilisateur plus fluide, sans interruptions fréquentes pour l'authentification.
+
+3. **Gestion des Sessions Longues**:
+   - Idéal pour les applications nécessitant des sessions utilisateur longues ou persistantes.
+
+### Considérations de Sécurité
+
+- **Protection des Refresh Tokens**:
+  - Les Refresh Tokens doivent être stockés de manière sécurisée, car ils permettent l'obtention de nouveaux Access Tokens.
+  
+- **Révocation des Tokens**:
+  - Implémenter des mécanismes pour révoquer les Refresh Tokens compromis afin de prévenir l'utilisation abusive.
+
+Le Refresh Token Flow est un élément clé pour maintenir l'accès sécurisé aux ressources tout en offrant une expérience utilisateur continue et sans interruptions fréquentes pour la réauthentification.
