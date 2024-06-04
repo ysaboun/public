@@ -96,3 +96,55 @@ En suivant une architecture de microservices, où chaque service est autonome et
 Refactoriser le code existant en utilisant les patterns de conception ci-dessus peut considérablement réduire la complexité cyclomatique. Les techniques de refactoring incluent l'extraction de méthodes, la décomposition de classes, et la clarification de la logique conditionnelle.
 
 En utilisant ces patterns de conception et principes d'architecture, il est possible de rendre le code plus modulaire, réutilisable et maintenable, ce qui conduit à une réduction de la complexité cyclomatique et à une amélioration de la qualité globale du code.
+
+
+
+____
+token
+L'Authorization Code est un concept clé dans le cadre du protocole OAuth 2.0, qui est utilisé pour autoriser les applications à accéder aux ressources d'un utilisateur de manière sécurisée. Voici une explication détaillée du processus impliquant l'Authorization Code :
+
+### Processus de l'Authorization Code Flow
+
+1. **Demande d'Autorisation**:
+   - L'utilisateur initie le processus en essayant d'accéder à une application cliente (par exemple, une application web ou mobile).
+   - L'application redirige l'utilisateur vers le serveur d'autorisation (Authorization Server), souvent avec une URL spécifique contenant des paramètres, comme le client ID, la redirection URI, et les scopes (permissions demandées).
+
+2. **Authentification de l'Utilisateur**:
+   - Le serveur d'autorisation demande à l'utilisateur de s'authentifier (souvent via un nom d'utilisateur et un mot de passe, ou d'autres méthodes comme l'authentification multifactorielle).
+
+3. **Consentement**:
+   - Après une authentification réussie, le serveur d'autorisation demande à l'utilisateur de consentir aux permissions demandées par l'application cliente.
+
+4. **Emission de l'Authorization Code**:
+   - Une fois l'utilisateur authentifié et ayant consenti, le serveur d'autorisation redirige l'utilisateur vers l'application cliente avec un Authorization Code. Ce code est court et temporaire, envoyé via l'URL de redirection spécifiée.
+
+5. **Échange de l'Authorization Code pour un Token**:
+   - L'application cliente envoie l'Authorization Code, accompagné de son propre client ID et client secret (s'il y a lieu), au serveur d'autorisation.
+   - Le serveur d'autorisation vérifie l'Authorization Code et, s'il est valide, émet un Access Token (et potentiellement un Refresh Token) que l'application cliente peut utiliser pour accéder aux ressources protégées au nom de l'utilisateur.
+
+### Schéma du Flux
+
+```plaintext
++----------+                               +---------------+
+|          |-- (1) Demande d'Autorisation ->|               |
+|  Client  |                               | Authorization  |
+|          |<-- (2) Authentification ------|    Server      |
+|          |                               |               |
+|          |<-- (3) Consentement ----------|               |
+|          |                               +---------------+
+|          |<-- (4) Authorization Code ----|
+|          |                               |
+|          |-- (5) Échange du Code -------->
+|          |     avec Client ID/Secret     |
+|          |                               |
+|          |<-- (6) Access Token ----------|
++----------+
+```
+
+### Avantages de l'Authorization Code Flow
+
+1. **Sécurité**: Le code d'autorisation est échangé directement entre l'application cliente et le serveur d'autorisation. Cela minimise l'exposition des tokens sensibles.
+2. **Confidentialité**: L'Authorization Code Flow est conçu pour les clients confidentiels, c'est-à-dire les applications qui peuvent sécuriser des informations sensibles comme des secrets clients.
+3. **Isolation des Credentials**: L'utilisateur fournit ses informations de connexion directement au serveur d'autorisation, pas à l'application cliente, réduisant ainsi les risques de compromission des credentials.
+
+En résumé, l'Authorization Code Flow est une méthode sécurisée et efficace pour gérer l'authentification et l'autorisation dans des applications qui nécessitent un accès aux ressources utilisateur.
