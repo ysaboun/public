@@ -128,7 +128,7 @@ L'Authorization Code est un concept clé dans le cadre du protocole OAuth 2.0, q
 +----------+                               +---------------+
 |          |-- (1) Demande d'Autorisation ->|               |
 |  Client  |                               | Authorization  |
-|          |<-- (2) Authentification ------|    Server      |
+|          |<-- (2) Authentification ------|  Server ISVA   |
 |          |                               |               |
 |          |<-- (3) Consentement ----------|               |
 |          |                               +---------------+
