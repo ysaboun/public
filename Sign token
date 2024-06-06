@@ -1,0 +1,11 @@
+Mise en place de mécanismes de détection des anomalies pour identifier les activités suspectes.
+
+La signature HTTP garantit que la requête n'a pas été modifiée en transit. Même si un attaquant obtient l'access token, il ne pourra pas facilement modifier les requêtes sans invalider la signature. Cela ajoute une couche de protection contre les attaques de type "man-in-the-middle".
+
+La signature HTTP assure que les données envoyées avec la requête n'ont pas été altérées. Ainsi, même si un attaquant intercepte le token, il ne pourra pas modifier les données sans être détecté
+
+Réduction de la portée de l'accès : En combinant les signatures HTTP avec des stratégies de token de courte durée et de rafraîchissement fréquent, on peut réduire la fenêtre pendant laquelle un token compromis est utile. Une signature HTTP ajoute une couche de complexité pour l'attaquant, rendant la compromission plus difficile à exploiter.
+
+Détection de l'usage frauduleux : Les serveurs peuvent loguer et analyser les requêtes signées pour détecter des comportements anormaux. Si un token est compromis et utilisé par un attaquant, les requêtes peuvent être comparées aux modèles de requêtes légitimes signées, permettant de détecter et de révoquer rapidement l'accès.
+
+En résumé, la signature HTTP ne peut pas empêcher directement la compromission d'un access token, mais elle peut fortement limiter les dégâts en garantissant l'intégrité et l'authenticité des requêtes, en rendant plus difficile l'exploitation des tokens compromis, et en aidant à la détection rapide des usages malveillants.
