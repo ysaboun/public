@@ -1,0 +1,83 @@
+Pour sécuriser la non-réutilisation d'un access token compromis, un serveur d'autorisation ou une API backend peut implémenter plusieurs mesures de sécurité robustes. Voici les principales stratégies :
+
+### 1. Durée de Vie Courte des Jetons
+
+**Description :** Limiter la durée de vie (Time-to-Live, TTL) des jetons d'accès.
+**Avantages :** Réduit la fenêtre de temps pendant laquelle un jeton compromis peut être utilisé.
+
+**Exemple :** 
+- Émettre des jetons avec une durée de vie de 5 à 15 minutes.
+
+### 2. Utilisation de Jetons de Rafraîchissement
+
+**Description :** Utiliser des jetons de rafraîchissement pour obtenir de nouveaux jetons d'accès.
+**Avantages :** Permet de révoquer les jetons de rafraîchissement indépendamment des jetons d'accès et limite l'utilisation de jetons compromis.
+
+**Exemple :**
+- Après expiration, un nouveau jeton d'accès est obtenu en échange du jeton de rafraîchissement.
+
+### 3. Révocation des Jetons
+
+**Description :** Implémenter un mécanisme pour révoquer des jetons.
+**Avantages :** Permet de désactiver immédiatement les jetons compromis.
+
+**Exemple :**
+- Maintenir une liste noire des jetons révoqués.
+- Le serveur d'autorisation gère une base de données pour stocker les jetons révoqués et les consulte à chaque requête.
+
+### 4. Vérification de l'Intégrité et de la Signature des Jetons
+
+**Description :** Utiliser des jetons JWT (JSON Web Tokens) signés pour garantir leur intégrité.
+**Avantages :** Permet de vérifier que le jeton n'a pas été altéré.
+
+**Exemple :**
+- Les services API valident la signature du JWT avant d'accepter le jeton.
+
+### 5. Gestion des Scopes et des Audiences
+
+**Description :** Utiliser des champs `scope` et `aud` pour limiter les permissions et les destinataires du jeton.
+**Avantages :** Restreint l'utilisation du jeton à des actions spécifiques et à des services précis.
+
+**Exemple :**
+- Le champ `aud` spécifie l'API ou le service prévu.
+- Le champ `scope` limite les actions autorisées par le jeton (lecture, écriture, etc.).
+
+### 6. Détection et Prévention des Utilisations Anormales
+
+**Description :** Implémenter des mécanismes pour détecter les comportements suspects et anormaux.
+**Avantages :** Permet d'identifier et de bloquer rapidement l'utilisation frauduleuse des jetons.
+
+**Exemple :**
+- Détection des accès depuis des adresses IP géographiquement distantes en peu de temps.
+- Limitation du nombre de requêtes par jeton dans une période donnée (throttling).
+
+### 7. Utilisation de HTTPS
+
+**Description :** Toujours utiliser HTTPS pour sécuriser les communications.
+**Avantages :** Protège les jetons contre les attaques d'interception (Man-in-the-Middle).
+
+### 8. Validation des Jetons avec un Serveur Central
+
+**Description :** Les API backend consultent un serveur central pour valider les jetons.
+**Avantages :** Assure une vérification centralisée de la validité des jetons.
+
+**Exemple :**
+- Avant de traiter une requête, l'API backend interroge le serveur d'autorisation pour valider le jeton.
+
+### 9. Token Binding
+
+**Description :** Lier les jetons à des attributs spécifiques du client (comme des certificats).
+**Avantages :** Assure que le jeton ne peut être utilisé que par le client auquel il a été émis.
+
+**Exemple :**
+- Utiliser des certificats client pour lier les jetons à des sessions TLS spécifiques.
+
+### 10. Rotation des Clés de Signature
+
+**Description :** Effectuer une rotation régulière des clés de signature utilisées pour signer les jetons.
+**Avantages :** Limite l'impact d'une clé compromise.
+
+**Exemple :**
+- Utiliser des paires de clés rotatives avec un mécanisme de gestion des clés pour maintenir la sécurité.
+
+En implémentant ces mesures, un serveur d'autorisation ou une API backend peut considérablement améliorer la sécurité des jetons d'accès et réduire les risques associés à leur compromission.
