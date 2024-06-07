@@ -46,3 +46,7 @@ Lors de chaque requête utilisant le token :
 ### 3. **Combiner les Restrictions**
 
 Pour renforcer la sécurité, vous pouvez combiner ces deux approches :
+
+
+
+Limitation par Contexte : Restreindre l'usage des tokens éphémères à des contextes spécifiques (par exemple, une adresse IP ou un appareil particulier).
