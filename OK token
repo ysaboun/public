@@ -1,0 +1,48 @@
+Token Binding
+Description : Lier les jetons à des attributs spécifiques du client (comme des certificats).
+Avantages : Assure que le jeton ne peut être utilisé que par le client auquel il a été émis.
+
+Exemple :
+
+Utiliser des certificats client pour lier les jetons à des sessions TLS spécifiques.
+
+
+Rotation des Clés de Signature
+Description : Effectuer une rotation régulière des clés de signature utilisées pour signer les jetons.
+Avantages : Limite l'impact d'une clé compromise.
+
+
+Envisager de recourir au principe du moindre privilège
+Lorsque vous concevez des stratégies IAM, gardez en tête le principe du moindre privilège. Accordez aux utilisateurs les rôles dont ils ont besoin pour accomplir une tâche, en cherchant à limiter le plus possible leur champ d'action : ne leur accordez pas de rôles dont ils n'ont pas besoin. Étudiez les recommandations concernant les rôles et mettez-les en application, pour éviter de définir dans votre environnement des stratégies IAM mêlant des rôles inutilisés, et des rôles offrant trop de possibilités.
+
+
+
+, il est tout à fait possible de restreindre l'utilisation d'un access token à un appareil spécifique ou à une adresse IP particulière. Voici comment cela peut être réalisé et quelles sont les considérations à prendre en compte :
+**JWT** : Ajoutez une revendication (claim) spécifique pour l'adresse IP dans le payload du JWT et vérifiez cette revendication à chaque requête.
+- **OAuth 2.0** : Utilisez des hooks ou des politiques de sécurité dans le serveur d'autorisation pour restreindre l'usage des tokens aux IP spécifiques.
+
+
+### 2. **Restreindre par Appareil**
+
+#### a. **Identification de l'Appareil**
+Il est possible d'identifier un appareil en utilisant divers attributs, comme :
+   - **Identifiants uniques** : ID de périphérique, empreintes digitales du navigateur, UUID, etc.
+   - **Certificats ou Clés** : Utilisation de certificats clients ou de clés privées stockées de manière sécurisée sur l'appareil.
+
+#### b. **Stockage des Identifiants**
+Associez les identifiants de l'appareil au token lors de la génération. Cela peut se faire de plusieurs manières :
+   - Inclure des identifiants spécifiques dans le payload du token.
+   - Stocker les identifiants dans une base de données associée aux tokens.
+
+#### c. **Vérification de l'Appareil**
+Lors de chaque requête utilisant le token :
+   - **Vérifiez les Identifiants** : Comparez les identifiants de l'appareil actuel avec ceux associés au token.
+   - **Certificats** : Si des certificats sont utilisés, assurez-vous que les certificats présentés sont valides et correspondent à ceux enregistrés.
+
+#### d. **Exemple de Mise en Œuvre**
+- **OAuth 2.0 avec Device ID** : Inclure un champ `device_id` dans le token et vérifier ce champ à chaque requête.
+- **Mobile App Security** : Utiliser des SDKs de sécurité mobile pour stocker et gérer les identifiants de manière sécurisée sur l'appareil.
+
+### 3. **Combiner les Restrictions**
+
+Pour renforcer la sécurité, vous pouvez combiner ces deux approches :
