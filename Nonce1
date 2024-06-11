@@ -1,0 +1,93 @@
+### Utilisation du Champ `state` dans OAuth2
+
+Le champ `state` dans OAuth2 est utilisé pour prévenir les attaques de falsification de requête intersite (CSRF). Il sert à maintenir l'état entre la demande d'autorisation initiale et la redirection de retour, assurant que la réponse reçue est bien liée à la requête émise par le client (application).
+
+#### Fonctionnement du Champ `state` :
+
+1. **Génération du `state`** :
+   Lors de l'envoi de la requête d'autorisation à l'autorisation serveur (généralement un serveur d'identité ou un serveur OAuth), le client génère un paramètre `state` qui est une chaîne de caractères aléatoire ou un identifiant unique.
+
+2. **Inclusion dans la Requête** :
+   Le client inclut ce paramètre `state` dans l'URL de requête d'autorisation.
+   
+   ```url
+   https://authorization-server.com/auth?
+     response_type=code&
+     client_id=CLIENT_ID&
+     redirect_uri=https://client-app.com/callback&
+     state=UNIQUE_STATE_VALUE
+   ```
+
+3. **Vérification du `state` à la Réception** :
+   Lorsque l'utilisateur accorde l'autorisation, le serveur d'autorisation redirige l'utilisateur vers le `redirect_uri` spécifié avec le `code` d'autorisation et le paramètre `state` initial.
+   
+   ```url
+   https://client-app.com/callback?
+     code=AUTH_CODE&
+     state=UNIQUE_STATE_VALUE
+   ```
+
+4. **Validation par le Client** :
+   Le client compare le `state` reçu avec celui qu'il a envoyé initialement. Si les valeurs correspondent, le client peut être raisonnablement certain que la redirection provient de la demande d'origine et non d'une attaque malveillante.
+   
+   ```javascript
+   if (receivedState === originalState) {
+     // Traitement normal de l'autorisation
+   } else {
+     // Possibilité d'une attaque CSRF, traitement approprié
+   }
+   ```
+
+#### Exemple d'utilisation du `state` :
+
+Imaginez que vous développez une application web qui utilise OAuth2 pour l'authentification via un fournisseur tiers (par exemple, Google ou Facebook). Lors de l'envoi de la demande d'autorisation, vous générez un `state` unique (par exemple, une combinaison d'un jeton de session utilisateur et d'une chaîne aléatoire). Vous incluez ce `state` dans la requête d'autorisation. Une fois l'utilisateur redirigé vers votre application avec le code d'autorisation et le `state`, vous comparez le `state` reçu avec celui que vous avez initialement envoyé. Si tout est en ordre, vous poursuivez le processus d'échange du code contre un jeton d'accès.
+
+### Différence avec le Champ `nonce`
+
+Le champ `nonce` est utilisé dans l'extension OpenID Connect (OIDC) de OAuth2, principalement pour la prévention des attaques par relecture (replay attacks) et pour assurer l'intégrité des jetons d'identité.
+
+#### Fonctionnement du Champ `nonce` :
+
+1. **Génération du `nonce`** :
+   Le client génère un `nonce`, qui est une valeur aléatoire ou un horodatage unique pour chaque demande d'authentification.
+
+2. **Inclusion dans la Requête d'Authentification** :
+   Le `nonce` est inclus dans la demande d'authentification OpenID Connect.
+
+   ```url
+   https://openid-provider.com/auth?
+     response_type=id_token&
+     client_id=CLIENT_ID&
+     redirect_uri=https://client-app.com/callback&
+     nonce=UNIQUE_NONCE_VALUE
+   ```
+
+3. **Inclusion dans le Jeton d'Identité** :
+   Lorsque le fournisseur d'identité émet le `id_token`, il inclut le `nonce` à l'intérieur du jeton.
+
+4. **Validation du `nonce`** :
+   À la réception du `id_token`, le client extrait le `nonce` du jeton et le compare au `nonce` initialement envoyé pour vérifier que le jeton d'identité est valide et n'a pas été falsifié.
+
+   ```javascript
+   if (receivedNonce === originalNonce) {
+     // Traitement normal du jeton d'identité
+   } else {
+     // Possibilité d'une attaque, traitement approprié
+   }
+   ```
+
+### Comparaison entre `state` et `nonce` :
+
+- **Objectif** :
+  - `state` : Prévenir les attaques CSRF en maintenant l'état entre la demande d'autorisation et la redirection de retour.
+  - `nonce` : Prévenir les attaques par relecture et assurer l'intégrité des jetons d'identité dans OpenID Connect.
+
+- **Utilisation** :
+  - `state` : Utilisé dans OAuth2 standard pour les flux d'autorisation.
+  - `nonce` : Utilisé principalement dans OpenID Connect lors de l'émission de jetons d'identité.
+
+- **Contexte** :
+  - `state` : Associé à l'autorisation et la gestion de la session.
+  - `nonce` : Associé à l'authentification et à la vérification des jetons d'identité.
+
+En résumé, `state` est essentiel pour sécuriser le flux d'autorisation contre les attaques CSRF, tandis que `nonce` joue un rôle crucial dans OpenID Connect pour sécuriser l'intégrité des jetons d'identité et prévenir les attaques par relecture.
