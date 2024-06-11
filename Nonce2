@@ -1,0 +1,95 @@
+Pour générer un `nonce` en Swift dans le contexte d'une demande de jeton OAuth2, vous pouvez suivre ces étapes. Le `nonce` est souvent utilisé pour garantir l'unicité et la sécurité des requêtes d'authentification, notamment dans le cadre de OpenID Connect (OIDC).
+
+Voici un exemple de code pour générer un `nonce` :
+
+### Exemple de Code Swift pour Générer un `Nonce`
+
+#### Utilisation de l'API iOS Randomisation
+
+Pour garantir que le `nonce` est unique et difficile à deviner, vous pouvez utiliser des fonctionnalités de randomisation fournies par Swift et iOS. L'une des façons les plus courantes de générer un `nonce` est d'utiliser une chaîne aléatoire basée sur des octets générés aléatoirement.
+
+```swift
+import Foundation
+import CryptoKit
+
+func generateNonce(length: Int = 32) -> String {
+    precondition(length > 0)
+
+    let charset: Array<Character> =
+        Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+    var result = ""
+    var remainingLength = length
+
+    while remainingLength > 0 {
+        let randoms: [UInt8] = (0..<16).map { _ in
+            var random: UInt8 = 0
+            let errorCode = SecRandomCopyBytes(kSecRandomDefault, 1, &random)
+            if errorCode != errSecSuccess {
+                fatalError("Unable to generate nonce. SecRandomCopyBytes failed with OSStatus \(errorCode)")
+            }
+            return random
+        }
+
+        randoms.forEach { random in
+            if remainingLength == 0 {
+                return
+            }
+
+            if random < charset.count {
+                result.append(charset[Int(random)])
+                remainingLength -= 1
+            }
+        }
+    }
+
+    return result
+}
+
+// Usage
+let nonce = generateNonce()
+print("Generated Nonce: \(nonce)")
+```
+
+### Explication du Code
+
+1. **Charset** : 
+   Le `charset` défini contient les caractères qui seront utilisés pour le `nonce`. Cette chaîne inclut des chiffres, des lettres majuscules et minuscules, et quelques caractères spéciaux communs. Cela garantit que le `nonce` est URL-safe et conforme aux spécifications.
+
+2. **Génération des Octets Aléatoires** :
+   La fonction `SecRandomCopyBytes` est utilisée pour générer des octets aléatoires sécurisés. Cela garantit que le `nonce` généré est imprévisible.
+
+3. **Construction du `Nonce`** :
+   Les octets aléatoires générés sont utilisés pour indexer le `charset` et construire progressivement la chaîne du `nonce`. Ce processus est répété jusqu'à ce que la longueur spécifiée soit atteinte.
+
+### Utilisation de `CryptoKit`
+
+Si vous avez besoin de créer des valeurs aléatoires encore plus sécurisées ou si vous utilisez Swift sur des plateformes qui supportent `CryptoKit`, vous pouvez aussi tirer parti de ses fonctions de génération aléatoire.
+
+```swift
+import Foundation
+import CryptoKit
+
+func generateCryptoNonce(length: Int = 32) -> String {
+    precondition(length > 0)
+
+    let charset: Array<Character> =
+        Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+    var result = ""
+    let randomBytes = (0..<length).map { _ in UInt8.random(in: 0..<charset.count) }
+
+    result = randomBytes.map { charset[Int($0)] }.joined()
+
+    return result
+}
+
+// Usage
+let cryptoNonce = generateCryptoNonce()
+print("Generated CryptoKit Nonce: \(cryptoNonce)")
+```
+
+### Utilisation
+
+- **Génération** : Utilisez la fonction `generateNonce` ou `generateCryptoNonce` pour créer un nonce unique.
+- **Intégration** : Le nonce généré peut ensuite être utilisé dans votre flux OAuth2 ou OpenID Connect, souvent en tant que paramètre dans l'URL de requête d'authentification ou comme partie des claims dans un jeton.
+
+Ce code offre une manière sécurisée et conforme de générer un `nonce` pour vos demandes OAuth2 ou OpenID Connect en Swift.
