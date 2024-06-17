@@ -1,1 +1,0 @@
-Bien que le nonce ne soit pas une exigence standard dans OAuth 2.0, il peut être utilisé dans des implémentations spécifiques ou personnalisées pour améliorer la sécurité, par exemple en protégeant contre les attaques de relecture.
