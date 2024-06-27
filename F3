@@ -1,0 +1,257 @@
+Pour implémenter une façade API en Spring Boot avec ACL (Access Control List) en utilisant Apache Shiro et des filtres, nous allons suivre ces étapes :
+
+1. Ajouter les dépendances nécessaires.
+2. Configurer Apache Shiro.
+3. Créer des ACL et des filtres personnalisés.
+4. Créer un contrôleur pour les ressources web.
+
+### 1. Ajouter les Dépendances Nécessaires
+
+Assurez-vous d'avoir les dépendances suivantes dans votre `pom.xml` :
+
+```xml
+<dependencies>
+    <!-- Spring Boot Starter Web -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <!-- Apache Shiro -->
+    <dependency>
+        <groupId>org.apache.shiro</groupId>
+        <artifactId>shiro-spring</artifactId>
+        <version>1.9.1</version>
+    </dependency>
+</dependencies>
+```
+
+### 2. Configurer Apache Shiro
+
+Créez une classe de configuration pour Shiro :
+
+#### `ShiroConfig.java`
+
+```java
+import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
+import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
+import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+@Configuration
+public class ShiroConfig {
+
+    @Bean
+    public SecurityManager securityManager() {
+        DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
+        securityManager.setRealm(myRealm());
+        return securityManager;
+    }
+
+    @Bean
+    public ShiroFilterFactoryBean shiroFilter(SecurityManager securityManager) {
+        ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
+        shiroFilterFactoryBean.setSecurityManager(securityManager);
+
+        Map<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
+        filterChainDefinitionMap.put("/login", "anon");
+        filterChainDefinitionMap.put("/logout", "logout");
+        filterChainDefinitionMap.put("/admin/**", "authc, roles[admin]");
+        filterChainDefinitionMap.put("/**", "authc");
+
+        shiroFilterFactoryBean.setLoginUrl("/login");
+        shiroFilterFactoryBean.setUnauthorizedUrl("/unauthorized");
+        shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
+        return shiroFilterFactoryBean;
+    }
+
+    @Bean
+    public MyRealm myRealm() {
+        return new MyRealm();
+    }
+
+    @Bean
+    public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager) {
+        AuthorizationAttributeSourceAdvisor advisor = new AuthorizationAttributeSourceAdvisor();
+        advisor.setSecurityManager(securityManager);
+        return advisor;
+    }
+}
+```
+
+#### `MyRealm.java`
+
+Créez un `Realm` personnalisé pour la gestion des utilisateurs et des rôles :
+
+```java
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.AuthenticationInfo;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.SimpleAuthenticationInfo;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authc.credential.CredentialsMatcher;
+import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
+import org.apache.shiro.authz.AuthorizationInfo;
+import org.apache.shiro.authz.SimpleAuthorizationInfo;
+import org.apache.shiro.realm.AuthorizingRealm;
+import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.util.ByteSource;
+import org.springframework.stereotype.Component;
+
+import java.util.HashSet;
+import java.util.Set;
+
+@Component
+public class MyRealm extends AuthorizingRealm {
+
+    @Override
+    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
+        String username = (String) principals.getPrimaryPrincipal();
+        Set<String> roles = new HashSet<>();
+        if ("admin".equals(username)) {
+            roles.add("admin");
+        }
+        SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo(roles);
+        return authorizationInfo;
+    }
+
+    @Override
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
+        UsernamePasswordToken upToken = (UsernamePasswordToken) token;
+        String username = upToken.getUsername();
+        String password = "password"; // Replace with password fetching from DB
+
+        if (!"admin".equals(username)) {
+            throw new AuthenticationException("User not found");
+        }
+
+        return new SimpleAuthenticationInfo(
+            username,
+            password,
+            ByteSource.Util.bytes(username),
+            getName()
+        );
+    }
+
+    @Override
+    public void setCredentialsMatcher(CredentialsMatcher credentialsMatcher) {
+        HashedCredentialsMatcher matcher = new HashedCredentialsMatcher();
+        matcher.setHashAlgorithmName("SHA-256");
+        matcher.setStoredCredentialsHexEncoded(true);
+        super.setCredentialsMatcher(matcher);
+    }
+}
+```
+
+### 3. Créer un Contrôleur pour les Ressources Web
+
+#### `WebController.java`
+
+```java
+import org.apache.shiro.authz.annotation.RequiresRoles;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class WebController {
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+
+    @GetMapping("/admin")
+    @RequiresRoles("admin")
+    public String admin(Model model) {
+        model.addAttribute("message", "Admin Page");
+        return "admin";
+    }
+
+    @GetMapping("/public")
+    public String publicPage(Model model) {
+        model.addAttribute("message", "Public Page");
+        return "public";
+    }
+
+    @GetMapping("/unauthorized")
+    public String unauthorized(Model model) {
+        model.addAttribute("message", "Unauthorized Page");
+        return "unauthorized";
+    }
+}
+```
+
+### 4. Création de Vues HTML
+
+#### `src/main/resources/templates/login.html`
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+</head>
+<body>
+    <form method="post" action="/login">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username"><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password"><br>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
+```
+
+#### `src/main/resources/templates/admin.html`
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Page</title>
+</head>
+<body>
+    <h1>${message}</h1>
+    <a href="/logout">Logout</a>
+</body>
+</html>
+```
+
+#### `src/main/resources/templates/public.html`
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Public Page</title>
+</head>
+<body>
+    <h1>${message}</h1>
+</body>
+</html>
+```
+
+#### `src/main/resources/templates/unauthorized.html`
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Unauthorized</title>
+</head>
+<body>
+    <h1>${message}</h1>
+    <a href="/login">Login</a>
+</body>
+</html>
+```
+
+### Conclusion
+
+Ce guide fournit un exemple de façade API en Spring Boot utilisant Apache Shiro pour gérer les ACL et les filtres de sécurité. Vous pouvez étendre cette configuration en ajoutant des fonctionnalités supplémentaires pour répondre aux besoins spécifiques de votre application. Assurez-vous de tester soigneusement les configurations de sécurité pour garantir qu'elles fonctionnent comme prévu.
