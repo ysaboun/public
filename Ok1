@@ -1,0 +1,227 @@
+Créer une façade API en Spring Boot avec des filtres, des gestionnaires (handlers) pour les ACL (Access Control Lists) et les jonctions, ainsi que la transformation HTTP et la protection des ressources web HTML, implique plusieurs étapes. Voici un exemple détaillé pour vous guider à travers ce processus.
+
+### 1. Configuration de Spring Security
+
+Commencez par configurer Spring Security pour gérer les ACL, les jonctions, et la protection des ressources web.
+
+#### `application.yml`
+
+```yaml
+server:
+  port: 8080
+
+spring:
+  security:
+    user:
+      name: admin
+      password: admin
+```
+
+#### `SecurityConfig.java`
+
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+            .authorizeRequests()
+                .antMatchers("/public/**").permitAll()
+                .antMatchers("/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
+                .and()
+            .formLogin()
+                .loginPage("/login")
+                .permitAll()
+                .and()
+            .logout()
+                .permitAll()
+                .and()
+            .csrf().disable(); // Disable CSRF for simplicity in this example
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}
+```
+
+### 2. Création de Filtres et Gestionnaires (Handlers)
+
+#### `CustomFilter.java`
+
+Créez un filtre personnalisé pour transformer les requêtes HTTP et appliquer des règles ACL.
+
+```java
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+public class CustomFilter extends HttpFilter {
+
+    @Override
+    protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
+        // Example of HTTP transformation: Add a custom header
+        response.addHeader("X-Custom-Header", "CustomValue");
+
+        // Example of ACL checking: (Replace with actual ACL logic)
+        if (request.getRequestURI().contains("/restricted")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
+            return;
+        }
+
+        // Continue the filter chain
+        chain.doFilter(request, response);
+    }
+}
+```
+
+#### `CustomHandler.java`
+
+Créez un gestionnaire pour gérer les jonctions (par exemple, pour interagir avec différents systèmes d'identité).
+
+```java
+import org.springframework.stereotype.Component;
+
+@Component
+public class CustomHandler {
+
+    public boolean checkAccess(String user, String resource) {
+        // Replace with actual ACL checking logic
+        if ("admin".equals(user) && "/admin".equals(resource)) {
+            return true;
+        }
+        return false;
+    }
+
+    // Add methods for junctions and other handlers
+}
+```
+
+### 3. Configurer les Filtres dans Spring Boot
+
+#### `FilterConfig.java`
+
+Enregistrez le filtre personnalisé dans Spring Boot.
+
+```java
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class FilterConfig {
+
+    @Bean
+    public FilterRegistrationBean<CustomFilter> customFilter() {
+        FilterRegistrationBean<CustomFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new CustomFilter());
+        registrationBean.addUrlPatterns("/*"); // Apply filter to all URLs
+        return registrationBean;
+    }
+}
+```
+
+### 4. Création d'un Contrôleur pour les Ressources Web
+
+#### `WebController.java`
+
+Créez un contrôleur pour servir les pages HTML.
+
+```java
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class WebController {
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+
+    @GetMapping("/admin")
+    public String admin(Model model) {
+        model.addAttribute("message", "Admin Page");
+        return "admin";
+    }
+
+    @GetMapping("/public")
+    public String publicPage(Model model) {
+        model.addAttribute("message", "Public Page");
+        return "public";
+    }
+}
+```
+
+### 5. Création de Vues HTML
+
+#### `src/main/resources/templates/login.html`
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+</head>
+<body>
+    <form method="post" action="/login">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username"><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password"><br>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
+```
+
+#### `src/main/resources/templates/admin.html`
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Page</title>
+</head>
+<body>
+    <h1>${message}</h1>
+    <a href="/logout">Logout</a>
+</body>
+</html>
+```
+
+#### `src/main/resources/templates/public.html`
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Public Page</title>
+</head>
+<body>
+    <h1>${message}</h1>
+</body>
+</html>
+```
+
+### Conclusion
+
+Ce guide couvre les bases pour créer une façade API en Spring Boot avec des filtres personnalisés, des gestionnaires pour les ACL et les jonctions, la transformation HTTP et la protection des ressources web. Vous pouvez adapter et étendre ces exemples pour répondre à vos besoins spécifiques en matière de sécurité et de gestion des accès.
