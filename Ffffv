@@ -1,0 +1,106 @@
+Pour sécuriser une page HTML/JavaScript et empêcher une attaque via des popups injectées, vous devez vous concentrer sur la prévention des vulnérabilités de type Cross-Site Scripting (XSS). Voici plusieurs étapes et bonnes pratiques que vous pouvez suivre pour protéger votre page :
+
+### 1. Échapper les Entrées Utilisateurs
+
+Échappez toujours les entrées des utilisateurs avant de les afficher dans le HTML ou d'utiliser dans le JavaScript. Voici comment vous pouvez échapper les chaînes de caractères en JavaScript :
+
+```javascript
+function escapeHtml(text) {
+    var map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+```
+
+### 2. Utiliser un Content Security Policy (CSP)
+
+Une Content Security Policy (CSP) permet de contrôler les sources de scripts qui peuvent être exécutés sur votre page. Voici un exemple de CSP strict :
+
+```html
+<head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; object-src 'none';">
+</head>
+```
+
+### 3. Validation Côté Serveur
+
+Validez et nettoyez toutes les entrées des utilisateurs côté serveur, même si vous avez déjà validé côté client. Cela empêche les utilisateurs malveillants de contourner la validation côté client.
+
+### 4. Utiliser des Bibliothèques de Sécurité
+
+Utilisez des bibliothèques et frameworks reconnus qui incluent des mesures de sécurité contre XSS et d'autres attaques. Par exemple, les frameworks comme React et Angular échappent automatiquement les données insérées dans le DOM.
+
+### Exemple Complet
+
+Voici un exemple complet d'une page HTML sécurisée qui affiche une popup lors du clic sur un bouton "Se connecter" :
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Page Sécurisée</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; object-src 'none';">
+    <style>
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <h1>Bienvenue sur notre site</h1>
+    <button id="loginBtn">Se connecter</button>
+    <div id="popup" class="popup">Connexion réussie !</div>
+
+    <script>
+        function escapeHtml(text) {
+            var map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        document.getElementById("loginBtn").addEventListener("click", function() {
+            var popup = document.getElementById("popup");
+            popup.style.display = 'block';
+        });
+
+        // Désactiver toutes les popups sauf celles autorisées au chargement de la page
+        window.onload = function() {
+            var allPopups = document.querySelectorAll('.popup');
+            allPopups.forEach(function(popup) {
+                if (popup.id !== 'popup') {
+                    popup.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+```
+
+### Explications des Mesures de Sécurité :
+
+1. **Échappement des Entrées Utilisateurs** : La fonction `escapeHtml` est prête à être utilisée pour échapper toute entrée utilisateur avant de l'injecter dans le DOM.
+   
+2. **Content Security Policy (CSP)** : La politique CSP empêche le chargement de scripts externes non autorisés, réduisant ainsi le risque de XSS.
+
+3. **Validation Côté Serveur** : Assurez-vous que tout formulaire ou toute donnée envoyée au serveur est validée et nettoyée pour empêcher les attaques.
+
+En appliquant ces pratiques, vous pouvez grandement améliorer la sécurité de votre page et protéger contre les attaques via des popups et d'autres formes de XSS.
