@@ -1,0 +1,53 @@
+
+management:
+  server:
+    add-application-context-header: false
+
+poc:
+  filter:
+    filterClass: com.bnppf.filter.RequestFilter
+    filterSecurity:
+      authorizationHeader: authorization
+      headerRequestId: x-request-id
+      headerOriginHost: x-forwarded-host
+      headerOriginPath: x-request-uri
+      jwtHeader: x-jwt-assertion
+      signature:
+        publicKeyUrl: "http://"
+        signatureHeader: signature
+    requiredHeaders:
+      #- ${filter.security.headerRequestId}
+      #- ${filter.security.authorizationHeader}
+      #- ${filter.security.signature.signatureHeader}
+      #- x-device-id
+      #- x-accept
+      #- x-accept-Charset
+      #- x-accept-Encoding
+      #- x-date
+      #- x-geo-location
+      #- x-http-method
+      #- x-ip-address
+      #- x-ip-port
+      - x-user-agent
+    trustedPath: "/fr/v1/trusted/"
+    uriToFilter:
+      - "/fr/v1/cpay_accounts"
+      - "/fr/v1/cpay_accounts/*"
+      - "/fr/v1/trusted"
+      - "/fr/v1/cpay_accounts"
+      - "/fr/v1/cpay_event"
+
+    # authorization URI
+    # uriRegexp: to identify the request type
+    # methode: authorized http method
+    # type: type of request related to constant REQUEST_TYPES enum
+    # apiContext: specified in apim and used by the called
+    authorizedUri:
+      - uriRegexp: ^/fr/v1/cpay_accounts$
+        method: GET
+        type: ACCOUNTS_REQUEST
+        apiContext: /cpay_accounts
+      - uriRegexp: ^/fr/v1/cpay_event$
+        method: POST
+        type: EVENT_REQUEST
+        apiContext: /cpay_event
