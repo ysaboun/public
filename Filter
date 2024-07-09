@@ -1,0 +1,1 @@
+Le pattern Filter (ou Intercepting Filter) est un modèle de conception comportemental utilisé pour effectuer des transformations ou des vérifications sur des requêtes ou des réponses avant qu'elles n'atteignent leur destination finale.
