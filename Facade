@@ -1,0 +1,1 @@
+Le pattern Facade est un modèle de conception structurel qui fournit une interface unifiée et simplifiée pour un ensemble de interfaces dans un sous-système complexe. En d'autres termes, il permet de masquer la complexité d'un système en fournissant un point d'accès unique.
