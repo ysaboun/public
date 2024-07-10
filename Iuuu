@@ -1,0 +1,69 @@
+Pour décoder un JWT (JSON Web Token) en Java, vous pouvez utiliser la bibliothèque `java-jwt` de Auth0. Voici un exemple de script Java pour décoder un JWT et lire son contenu :
+
+1. **Ajouter la dépendance `java-jwt` à votre projet :**
+
+   Si vous utilisez Maven, ajoutez cette dépendance à votre fichier `pom.xml` :
+
+   ```xml
+   <dependency>
+       <groupId>com.auth0</groupId>
+       <artifactId>java-jwt</artifactId>
+       <version>3.19.2</version>
+   </dependency>
+   ```
+
+   Si vous utilisez Gradle, ajoutez cette ligne à votre fichier `build.gradle` :
+
+   ```groovy
+   implementation 'com.auth0:java-jwt:3.19.2'
+   ```
+
+2. **Créer une classe Java pour décoder le JWT :**
+
+   ```java
+   import com.auth0.jwt.JWT;
+   import com.auth0.jwt.interfaces.DecodedJWT;
+   import com.auth0.jwt.exceptions.JWTDecodeException;
+
+   public class JwtDecoder {
+       public static void main(String[] args) {
+           String token = "votre_jwt_ici";
+
+           try {
+               // Décoder le JWT sans vérifier la signature
+               DecodedJWT decodedJWT = JWT.decode(token);
+               
+               // Extraire les claims
+               String issuer = decodedJWT.getIssuer();
+               String subject = decodedJWT.getSubject();
+               String audience = decodedJWT.getAudience().toString();
+               String payload = decodedJWT.getPayload();
+               
+               // Afficher les informations du JWT
+               System.out.println("Issuer: " + issuer);
+               System.out.println("Subject: " + subject);
+               System.out.println("Audience: " + audience);
+               System.out.println("Payload: " + payload);
+               
+           } catch (JWTDecodeException exception){
+               // Si le token est invalide
+               System.err.println("Le JWT est invalide: " + exception.getMessage());
+           }
+       }
+   }
+   ```
+
+   Remplacez `"votre_jwt_ici"` par le JWT que vous souhaitez décoder.
+
+3. **Exécuter le script :**
+
+   Compilez et exécutez votre programme Java pour voir les informations décodées du JWT.
+
+   ```sh
+   javac -cp .:path/to/java-jwt-3.19.2.jar JwtDecoder.java
+   java -cp .:path/to/java-jwt-3.19.2.jar JwtDecoder
+   ```
+
+Assurez-vous de remplacer `path/to/java-jwt-3.19.2.jar` par le chemin réel vers le fichier jar de la bibliothèque `java-jwt`.
+
+Ce script décode un JWT sans vérifier la signature, ce qui peut être suffisant pour des tests ou des débogages. Pour une utilisation en production, il est essentiel de vérifier la signature du JWT pour s'assurer de son authenticité et de son intégrité. Pour ce faire, vous devrez également inclure une clé secrète ou un certificat public selon le type de signature utilisé (HMAC ou RSA).
