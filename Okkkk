@@ -1,0 +1,11 @@
+ChatGPT
+
+C'est quoi le code http 400
+ChatGPT
+Le code HTTP 400, également connu sous le nom de "Bad Request" (mauvaise requête en français), indique que le serveur n'a pas pu comprendre la requête envoyée par le client en raison d'une syntaxe incorrecte. Cela peut se produire pour plusieurs raisons, telles que :
+
+Une requête mal formée (par exemple, des erreurs de syntaxe dans le format de la requête).
+Des paramètres de requête incorrects ou manquants.
+Une taille de requête trop grande.
+Des en-têtes de requête mal formés ou incomplets.
+En général, un code 400 signifie que le client doit corriger sa requête avant de la renvoyer au serveur.
