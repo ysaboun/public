@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# URL à appeler
+URL="https://api.example.com/secure-endpoint"
+
+# Chemins vers les certificats et clé privée
+CERT_FILE="/chemin/vers/votre/cert.pem"
+KEY_FILE="/chemin/vers/votre/key.pem"
+CA_CERT_FILE="/chemin/vers/votre/ca-cert.pem"
+
+# Passphrase pour la clé privée
+PASSPHRASE="votre_passphrase"
+
+# Appel de la route en utilisant curl
+curl --cert $CERT_FILE --key $KEY_FILE --pass $PASSPHRASE --cacert $CA_CERT_FILE $URL
