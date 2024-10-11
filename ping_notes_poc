@@ -1,0 +1,44 @@
+const https = require('https');
+
+// Configuration
+const clientId = 'VOTRE_CLIENT_ID';
+const redirectUri = 'VOTRE_REDIRECT_URI';
+const authUrl = 'https://exemple.com/oauth/authorize'; // Remplacez par l'URL d'autorisation de votre fournisseur
+
+// Fonction pour obtenir un token
+function getAccessToken() {
+  // Construire l'URL de requête
+  const url = `${authUrl}?response_type=token&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&prompt=none`;
+
+  // Faire la requête HTTPS
+  https.get(url, (res) => {
+    let data = '';
+
+    // Accumuler les données
+    res.on('data', (chunk) => {
+      data += chunk;
+    });
+
+    // Quand la réponse est terminée
+    res.on('end', () => {
+      // Vérifier si le code de réponse est 200
+      if (res.statusCode === 200) {
+        // Analyse de l'URL pour extraire le token
+        const tokenMatch = data.match(/#access_token=([^&]*)/);
+        if (tokenMatch && tokenMatch[1]) {
+          const accessToken = tokenMatch[1];
+          console.log('Access Token:', accessToken);
+        } else {
+          console.error('Access token non trouvé dans la réponse.');
+        }
+      } else {
+        console.error('Erreur lors de la requête:', res.statusCode);
+      }
+    });
+  }).on('error', (err) => {
+    console.error('Erreur de requête:', err);
+  });
+}
+
+// Appeler la fonction pour obtenir le token
+getAccessToken();
