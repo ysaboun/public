@@ -1,0 +1,74 @@
+Le flux **JWT Bearer** (ou **JWT Bearer Token Flow**) est un des nombreux flux d'authentification OAuth2 utilisé pour obtenir un token d'accès en utilisant un **JWT** (JSON Web Token) comme méthode d'authentification. C'est un mécanisme qui permet à une application de s'authentifier auprès d'un serveur d'autorisation et de demander un token d'accès sans qu'un utilisateur ne soit directement impliqué (par exemple, sans avoir besoin de passer par un écran de connexion).
+
+### Contexte d'utilisation :
+Le flux **JWT Bearer** est principalement utilisé dans des cas où une application, un service ou une machine souhaite s'authentifier de manière sécurisée pour obtenir un token d'accès auprès d'un serveur OAuth2. Ce flux est souvent utilisé dans des architectures microservices ou dans des scénarios d'intégration entre serveurs (server-to-server).
+
+### Fonctionnement :
+
+1. **Création du JWT (Assertion JWT)** : 
+   - Le client (service ou application) crée un JWT signé (généralement avec une clé privée) qui contient des informations spécifiques, telles que l'identifiant de l'application, des informations sur l'utilisateur, la durée de validité, etc.
+   
+2. **Envoi au serveur OAuth2** : 
+   - Ce JWT (appelé **assertion JWT**) est envoyé au serveur d'autorisation OAuth2 (par exemple PingFederate ou un autre serveur compatible) en tant que preuve d'authentification dans une requête HTTP POST vers un endpoint spécifique (`/token`), en utilisant un `grant_type` spécial appelé `urn:ietf:params:oauth:grant-type:jwt-bearer`.
+
+3. **Vérification du JWT** : 
+   - Le serveur d'autorisation valide le JWT en vérifiant sa signature, ses revendications (claims), et s'assure que tout est conforme (comme l'expiration du token, le sujet, etc.).
+
+4. **Obtention d'un token d'accès** : 
+   - Si tout est correct, le serveur OAuth2 retourne un **token d'accès** au client, qui peut être utilisé pour accéder à des ressources protégées.
+
+### Exemple de Requête (POST) pour obtenir un token via JWT Bearer
+
+```bash
+POST /oauth2/token HTTP/1.1
+Host: auth.example.com
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
+&assertion=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9... (le JWT ici)
+&scope=read write
+```
+
+- **grant_type** : Le type de flux OAuth2, ici on utilise le `jwt-bearer`.
+- **assertion** : Le JWT signé que l'on envoie au serveur.
+- **scope** : Optionnel, cela permet de préciser les permissions demandées.
+
+### Cas d'utilisation :
+
+- **Intégrations serveur à serveur** : Deux serveurs peuvent s'authentifier l'un auprès de l'autre sans intervention humaine.
+- **Applications sans utilisateur** : Lorsque vous avez une application backend qui doit accéder à une API pour effectuer des actions au nom d'un service.
+- **Authentification déléguée** : Un service qui agit au nom d'un utilisateur peut utiliser un JWT qui représente cet utilisateur pour obtenir un token d'accès.
+
+### Structure d'un JWT :
+
+Un JWT comporte généralement trois parties : 
+
+1. **Header** : Contient des informations sur l'algorithme de signature et le type de token.
+2. **Payload (Claim Set)** : Contient les revendications (claims), par exemple les informations sur l'application ou l'utilisateur (ex: `iss`, `sub`, `exp`).
+3. **Signature** : Est utilisée pour vérifier que le token n'a pas été altéré. Elle est générée en utilisant un algorithme de hachage et une clé privée.
+
+### Exemple de JWT (non signé) :
+
+```json
+{
+  "alg": "RS256",
+  "typ": "JWT"
+}
+.
+{
+  "iss": "client-id-example",
+  "sub": "user@example.com",
+  "aud": "https://auth.example.com/token",
+  "exp": 1618842867,
+  "iat": 1618842267
+}
+.
+(signature)
+```
+
+### Différence avec Bearer :
+
+- **JWT Bearer** est un flux d'authentification pour obtenir un token.
+- **Bearer** est un schéma d'autorisation utilisé pour envoyer un token d'accès lors d'une requête API.
+
+En résumé, le flux **JWT Bearer** est un moyen d'obtenir un token OAuth2 en utilisant un JWT signé, tandis que le schéma **Bearer** est utilisé pour transmettre ce token lors des requêtes API.
