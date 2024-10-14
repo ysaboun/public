@@ -1,0 +1,51 @@
+Pour appeler une API Gateway avec un token d'accès OAuth2 émis par PingFederate au format JWT en Node.js natif, tu devrais utiliser simplement le schéma `Bearer` dans l'en-tête HTTP. Le schéma `JWT-Bearer` est utilisé dans d'autres contextes, comme l'obtention d'un token OAuth2 via le flux JWT Bearer, mais pour appeler l'API, tu utilises uniquement `Bearer`.
+
+Voici un exemple en Node.js natif pour appeler une API Gateway avec un access token au format JWT :
+
+### Exemple
+
+```javascript
+const https = require('https');
+
+// Configuration de l'API et du token d'accès
+const options = {
+  hostname: 'api.example.com', // Remplacer par l'URL de l'API
+  port: 443, // ou un autre port si nécessaire
+  path: '/endpoint', // Remplacer par l'endpoint que tu veux appeler
+  method: 'GET', // Peut être POST, PUT, DELETE selon l'action
+  headers: {
+    'Authorization': `Bearer ${accessToken}`, // Inclure le token JWT dans l'en-tête
+    'Content-Type': 'application/json'
+  }
+};
+
+// Faire la requête
+const req = https.request(options, (res) => {
+  let data = '';
+
+  // Récupérer la réponse de l'API
+  res.on('data', (chunk) => {
+    data += chunk;
+  });
+
+  // Quand toute la réponse est reçue
+  res.on('end', () => {
+    console.log('Response:', JSON.parse(data));
+  });
+});
+
+// Gérer les erreurs
+req.on('error', (error) => {
+  console.error('Error:', error);
+});
+
+// Fin de la requête
+req.end();
+```
+
+### Explications :
+
+1. **`Authorization`:** Le token JWT est envoyé dans l'en-tête `Authorization` en utilisant le schéma `Bearer`.
+2. **`https.request()`:** Utilisation de la bibliothèque native `https` pour envoyer la requête. Tu peux remplacer cette méthode par `http.request()` si tu appelles une API en HTTP.
+
+Cela devrait fonctionner pour appeler n'importe quelle API Gateway sécurisée par OAuth2 et PingFederate avec un token JWT.
